@@ -4,6 +4,11 @@ class User extends Model {
   static init(sequelize) {
     super.init(
       {
+        id: {
+          type: Sequelize.UUID,
+          defaultValue: Sequelize.UUIDV4,
+          primaryKey: true,
+        },
         name: {
           type: Sequelize.STRING,
           allowNull: false,
@@ -17,12 +22,14 @@ class User extends Model {
           type: Sequelize.STRING,
           allowNull: false,
         },
-        sword: {
-          type: Sequelize.STRING,
-          allowNull: false,
-        },
       },
-      { sequelize }
+      {
+        sequelize,
+        tableName: "users",
+        timestamps: true,
+        createdAt: "created_at",
+        updatedAt: "updated_at",
+      }
     );
   }
 }

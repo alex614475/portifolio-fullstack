@@ -12,12 +12,12 @@ const router = express.Router();
 router.post("/cadastro", createUser);
 
 // Listar todos os usuários
-router.get("/", getAllUser);
+router.get("/todos", getAllUser);
 
 // Atualizar usuário pelo ID
 router.put("/:id", updateUser);
 
 // Deletar usuário pelo ID
-router.delete("/:id", deleteUser);
+router.delete("/:delete", deleteUser);
 
 export default router;
