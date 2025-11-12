@@ -8,44 +8,41 @@ export default function Cadastro() {
   const emailRef = useRef();
   const passwordRef = useRef();
   const navigate = useNavigate();
+
   const [loading, setLoading] = useState(false);
+  const [foto, setFoto] = useState(null);
+  const [preview, setPreview] = useState(null);
+
+  const handleFotoChange = (e) => {
+    const file = e.target.files[0];
+    setFoto(file);
+    if (file) setPreview(URL.createObjectURL(file));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
-    const dados = {
-      name: nameRef.current.value,
-      email: emailRef.current.value,
-      password: passwordRef.current.value,
-    };
+    const formData = new FormData();
+    formData.append("name", nameRef.current.value);
+    formData.append("email", emailRef.current.value);
+    formData.append("password", passwordRef.current.value);
+    if (foto) formData.append("foto", foto);
 
     try {
-      // 1️⃣ Cadastra o usuário
-      await cadastrarUsuario(dados);
-      alert(`✅ Cadastro realizado com sucesso!`);
+      await cadastrarUsuario(formData);
+      alert("Cadastro realizado com sucesso!");
 
-      // 2️⃣ Faz login automático
       const loginResponse = await loginUsuario({
-        email: dados.email,
-        password: dados.password,
+        email: emailRef.current.value,
+        password: passwordRef.current.value,
       });
 
-      // 3️⃣ Guarda o token no localStorage
       const { token } = loginResponse;
       localStorage.setItem("token", token);
-
-      // 4️⃣ Redireciona para lista de usuários
       navigate("/listar-usuarios");
     } catch (error) {
-      alert(
-        error.response?.data?.message ||
-          `❌ Erro ao cadastrar. Dados enviados: ${JSON.stringify(
-            dados,
-            null,
-            2
-          )}`
-      );
+      alert(error.response?.data?.message || "Erro ao cadastrar usuário.");
     } finally {
       setLoading(false);
     }
@@ -56,23 +53,48 @@ export default function Cadastro() {
       <form
         onSubmit={handleSubmit}
         className="bg-white dark:bg-gray-800 shadow-lg rounded-xl p-8 w-full max-w-sm transition-colors duration-300"
+        encType="multipart/form-data"
       >
-        <h2 className="text-3xl font-bold text-gray-800 dark:text-white mb-8 text-center">
+        <h2 className="text-3xl font-bold text-gray-800 dark:text-white mb-4 text-center">
           Criar Conta
         </h2>
 
-        {/* Nome */}
-        <div className="mb-6">
+        <div className="flex justify-center mb-8">
           <label
-            htmlFor="nome"
-            className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300"
+            htmlFor="foto-upload"
+            className="cursor-pointer relative group"
           >
+            <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-white shadow-lg bg-gray-200 flex items-center justify-center">
+              {preview ? (
+                <img
+                  src={preview}
+                  alt="Pré-visualização"
+                  className="object-cover w-full h-full"
+                />
+              ) : (
+                <span className="text-gray-500 text-2xl">📷</span>
+              )}
+            </div>
+            <input
+              id="foto-upload"
+              type="file"
+              accept="image/*"
+              onChange={handleFotoChange}
+              className="hidden"
+            />
+            <div className="absolute inset-0 bg-black/30 rounded-full opacity-0 group-hover:opacity-100 flex items-center justify-center transition">
+              <span className="text-white text-xs font-medium">Trocar</span>
+            </div>
+          </label>
+        </div>
+
+        <div className="mb-6">
+          <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
             Nome completo
           </label>
           <input
             ref={nameRef}
             type="text"
-            id="nome"
             placeholder="Seu nome completo"
             required
             className="w-full p-3 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 
@@ -81,18 +103,13 @@ export default function Cadastro() {
           />
         </div>
 
-        {/* E-mail */}
         <div className="mb-6">
-          <label
-            htmlFor="email"
-            className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300"
-          >
+          <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
             E-mail
           </label>
           <input
             ref={emailRef}
             type="email"
-            id="email"
             placeholder="email@exemplo.com"
             required
             className="w-full p-3 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 
@@ -101,18 +118,13 @@ export default function Cadastro() {
           />
         </div>
 
-        {/* Senha */}
         <div className="mb-6">
-          <label
-            htmlFor="password"
-            className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300"
-          >
+          <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
             Senha
           </label>
           <input
             ref={passwordRef}
             type="password"
-            id="password"
             placeholder="••••••••"
             required
             className="w-full p-3 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 
@@ -121,7 +133,6 @@ export default function Cadastro() {
           />
         </div>
 
-        {/* Botão */}
         <button
           type="submit"
           disabled={loading}

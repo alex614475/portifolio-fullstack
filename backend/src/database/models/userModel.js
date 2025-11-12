@@ -22,6 +22,10 @@ export default class User extends Model {
           type: DataTypes.STRING,
           allowNull: false,
         },
+        url_foto_perfil: {
+          type: DataTypes.STRING,
+          allowNull: true,
+        },
       },
       {
         sequelize,
