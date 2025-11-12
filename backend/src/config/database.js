@@ -1,4 +1,3 @@
-// src/database/config/database.js
 import { Sequelize } from "sequelize";
 
 const config = {
@@ -16,7 +15,6 @@ const config = {
   },
 };
 
-// Cria a instância Sequelize usando as configs acima
 export const sequelize = new Sequelize(
   config.database,
   config.username,

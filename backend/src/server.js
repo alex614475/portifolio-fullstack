@@ -13,10 +13,10 @@ app.use("/api/auth", authRoutes);
 sequelize
   .authenticate()
   .then(() => {
-    console.log("✅ Conectado ao banco com sucesso!");
+    console.log("Conectado ao banco com sucesso!");
     return sequelize.sync();
   })
   .then(() => {
-    app.listen(3000, () => console.log("🚀 Servidor rodando na porta 3000"));
+    app.listen(3000, () => console.log("Servidor rodando na porta 3000"));
   })
-  .catch((err) => console.error("❌ Erro ao conectar no banco:", err));
+  .catch((err) => console.error(" Erro ao conectar no banco:", err));

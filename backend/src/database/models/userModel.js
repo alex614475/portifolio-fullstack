@@ -1,4 +1,3 @@
-// src/database/models/userModel.js
 import { DataTypes, Model } from "sequelize";
 
 export default class User extends Model {
