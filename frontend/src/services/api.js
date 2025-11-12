@@ -1,5 +1,15 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseUrl: "http://localhost:3000",
+  baseURL: "http://localhost:3000/usuarios",
 });
+// Interceptor global para erros
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    console.error("Erro na requisição:", error.response?.data || error.message);
+    return Promise.reject(error);
+  }
+);
+
+export default api;

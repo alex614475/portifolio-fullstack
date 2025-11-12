@@ -3,9 +3,12 @@ import userRoutes from "./routes.js";
 import { Sequelize } from "sequelize";
 import config from "./config/database.js";
 import User from "./models/userModel.js";
+import cors from "cors";
 
 const app = express();
 app.use(express.json());
+
+app.use(cors());
 
 const sequelize = new Sequelize(config);
 User.init(sequelize);

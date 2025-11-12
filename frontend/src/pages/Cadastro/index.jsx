@@ -1,17 +1,35 @@
-import { Link } from "react-router-dom";
-import { useRef } from "react";
+import { useRef, useState } from "react";
+import { cadastrarUsuario } from "../../services/cadastroService";
 
 export default function Cadastro() {
   const nameRef = useRef();
   const emailRef = useRef();
   const passwordRef = useRef();
+  const [loading, setLoading] = useState(false);
 
-  function handleSubmit(event) {
-    event.preventDefault();
-    console.log(nameRef.current.value);
-    console.log(emailRef.current.value);
-    console.log(passwordRef.current.value);
-  }
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+
+    const dados = {
+      name: nameRef.current.value,
+      email: emailRef.current.value,
+      password: passwordRef.current.value,
+    };
+
+    try {
+      const usuarioCriado = await cadastrarUsuario(dados);
+      alert(`Cadastro realizado com sucesso! Bem-vindo, ${usuarioCriado.name}`);
+      e.target.reset();
+    } catch (error) {
+      alert(
+        error.response?.data?.message ||
+          `Erro ao cadastrar. Dados enviados: ${JSON.stringify(dados, null, 2)}`
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
   return (
     <>
       <div className="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8">
