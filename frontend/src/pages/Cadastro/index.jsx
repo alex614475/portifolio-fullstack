@@ -1,10 +1,13 @@
 import { useRef, useState } from "react";
 import { cadastrarUsuario } from "../../services/cadastroService";
+import { loginUsuario } from "../../services/loginService";
+import { useNavigate } from "react-router-dom";
 
 export default function Cadastro() {
   const nameRef = useRef();
   const emailRef = useRef();
   const passwordRef = useRef();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
@@ -18,15 +21,26 @@ export default function Cadastro() {
     };
 
     try {
-      const usuarioCriado = await cadastrarUsuario(dados);
-      alert(
-        ` Cadastro realizado com sucesso! Bem-vindo, ${usuarioCriado.name}`
-      );
-      e.target.reset();
+      // 1️⃣ Cadastra o usuário
+      await cadastrarUsuario(dados);
+      alert(`✅ Cadastro realizado com sucesso!`);
+
+      // 2️⃣ Faz login automático
+      const loginResponse = await loginUsuario({
+        email: dados.email,
+        password: dados.password,
+      });
+
+      // 3️⃣ Guarda o token no localStorage
+      const { token } = loginResponse;
+      localStorage.setItem("token", token);
+
+      // 4️⃣ Redireciona para lista de usuários
+      navigate("/listar-usuarios");
     } catch (error) {
       alert(
         error.response?.data?.message ||
-          ` Erro ao cadastrar. Dados enviados: ${JSON.stringify(
+          `❌ Erro ao cadastrar. Dados enviados: ${JSON.stringify(
             dados,
             null,
             2
