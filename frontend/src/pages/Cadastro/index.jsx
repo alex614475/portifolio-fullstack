@@ -20,13 +20,13 @@ export default function Cadastro() {
     try {
       const usuarioCriado = await cadastrarUsuario(dados);
       alert(
-        `✅ Cadastro realizado com sucesso! Bem-vindo, ${usuarioCriado.name}`
+        ` Cadastro realizado com sucesso! Bem-vindo, ${usuarioCriado.name}`
       );
       e.target.reset();
     } catch (error) {
       alert(
         error.response?.data?.message ||
-          `❌ Erro ao cadastrar. Dados enviados: ${JSON.stringify(
+          ` Erro ao cadastrar. Dados enviados: ${JSON.stringify(
             dados,
             null,
             2

@@ -18,7 +18,7 @@ export default function Login() {
     };
 
     try {
-      const data = await loginUsuario(dados); // data = { token }
+      const data = await loginUsuario(dados);
       const { token } = data;
 
       localStorage.setItem("token", token);

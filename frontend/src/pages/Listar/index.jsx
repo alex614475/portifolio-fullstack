@@ -6,7 +6,6 @@ export default function ListarUsuarios() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // Função para buscar usuários
   const carregarUsuarios = async () => {
     const token = localStorage.getItem("token");
 
@@ -33,7 +32,6 @@ export default function ListarUsuarios() {
     carregarUsuarios();
   }, []);
 
-  // 👉 Atualizar lista manualmente
   const atualizarLista = () => {
     setLoading(true);
     carregarUsuarios();
