@@ -147,3 +147,22 @@ export const deleteUser = async (req, res) => {
     });
   }
 };
+export const getProfile = async (req, res) => {
+  try {
+    const user = await User.findByPk(req.user.id, {
+      attributes: ["id", "name", "email", "url_foto_perfil", "created_at"],
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: "Usuário não encontrado" });
+    }
+
+    return res.status(200).json(user);
+  } catch (error) {
+    console.error("Erro ao buscar perfil:", error);
+    return res.status(500).json({
+      message: "Erro ao buscar perfil",
+      error: error.message,
+    });
+  }
+};

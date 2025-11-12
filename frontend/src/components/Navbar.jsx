@@ -1,9 +1,40 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import api from "../services/api";
 
 export default function Navbar() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const response = await api.get("/auth/me", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setUser(response.data);
+      } catch (error) {
+        console.error("Erro ao carregar usuário:", error);
+        if (error.response?.status === 401) {
+          // Token inválido ou expirado → força logout
+          localStorage.removeItem("token");
+          setUser(null);
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUser();
+  }, []);
 
   return (
     <nav className="bg-white border-gray-200 dark:bg-gray-900 shadow-sm">
@@ -25,32 +56,42 @@ export default function Navbar() {
 
         {/* Parte direita: perfil + botão menu */}
         <div className="flex items-center md:order-2 space-x-3 md:space-x-0 rtl:space-x-reverse relative">
-          {/* Botão do perfil */}
-          <button
-            type="button"
-            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-            className="flex text-sm bg-gray-800 rounded-full focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600"
-          >
-            <span className="sr-only">Abrir menu do usuário</span>
-            <img
-              className="w-8 h-8 rounded-full"
-              src="https://flowbite.com/docs/images/people/profile-picture-3.jpg"
-              alt="user photo"
-            />
-          </button>
+          {/* Avatar ou placeholder de carregamento */}
+          {loading ? (
+            <div className="w-8 h-8 bg-gray-300 rounded-full animate-pulse"></div>
+          ) : (
+            user && (
+              <button
+                type="button"
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                className="flex text-sm bg-gray-800 rounded-full focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600"
+              >
+                <span className="sr-only">Abrir menu do usuário</span>
+                <img
+                  className="w-8 h-8 rounded-full object-cover"
+                  src={
+                    user.url_foto_perfil
+                      ? `http://localhost:3000/uploads/${user.url_foto_perfil}`
+                      : "https://flowbite.com/docs/images/people/profile-picture-3.jpg"
+                  }
+                  alt="user photo"
+                />
+              </button>
+            )
+          )}
 
           {/* Dropdown do perfil */}
-          {isDropdownOpen && (
+          {isDropdownOpen && user && (
             <div
               className="absolute top-10 right-0 z-50 my-4 text-base list-none bg-white divide-y divide-gray-100 rounded-lg shadow-sm dark:bg-gray-700 dark:divide-gray-600"
               id="user-dropdown"
             >
               <div className="px-4 py-3">
                 <span className="block text-sm text-gray-900 dark:text-white">
-                  Usuário Logado
+                  {user.name}
                 </span>
                 <span className="block text-sm text-gray-500 truncate dark:text-gray-400">
-                  usuario@email.com
+                  {user.email}
                 </span>
               </div>
               <ul className="py-2" aria-labelledby="user-menu-button">
@@ -63,18 +104,22 @@ export default function Navbar() {
                   </Link>
                 </li>
                 <li>
-                  <Link
-                    to="/logout"
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-600"
+                  <button
+                    onClick={() => {
+                      localStorage.removeItem("token");
+                      setUser(null);
+                      window.location.href = "/login";
+                    }}
+                    className="w-full text-left block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-600"
                   >
                     Sair
-                  </Link>
+                  </button>
                 </li>
               </ul>
             </div>
           )}
 
-          {/* Botão para mobile */}
+          {/* Botão mobile */}
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             type="button"
@@ -122,26 +167,30 @@ export default function Navbar() {
                 Home
               </Link>
             </li>
-            <li>
-              <Link
-                to="/login"
-                className="block py-2 px-3 text-gray-900 hover:bg-gray-100 
-                md:hover:bg-transparent md:hover:text-blue-700 md:p-0 dark:text-white 
-                md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white"
-              >
-                Login
-              </Link>
-            </li>
-            <li>
-              <Link
-                to="/cadastro"
-                className="block py-2 px-3 text-gray-900 hover:bg-gray-100 
-                md:hover:bg-transparent md:hover:text-blue-700 md:p-0 dark:text-white 
-                md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white"
-              >
-                Cadastro
-              </Link>
-            </li>
+            {!user && !loading && (
+              <>
+                <li>
+                  <Link
+                    to="/login"
+                    className="block py-2 px-3 text-gray-900 hover:bg-gray-100 
+                    md:hover:bg-transparent md:hover:text-blue-700 md:p-0 dark:text-white 
+                    md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white"
+                  >
+                    Login
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/cadastro"
+                    className="block py-2 px-3 text-gray-900 hover:bg-gray-100 
+                    md:hover:bg-transparent md:hover:text-blue-700 md:p-0 dark:text-white 
+                    md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white"
+                  >
+                    Cadastro
+                  </Link>
+                </li>
+              </>
+            )}
           </ul>
         </div>
       </div>

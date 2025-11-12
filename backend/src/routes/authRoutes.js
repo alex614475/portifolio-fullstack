@@ -8,6 +8,7 @@ import {
 } from "../controllers/authController.js";
 import { verificarToken } from "../middlewares/authMiddleware.js";
 import { upload } from "../config/multerConfig.js";
+import { getProfile } from "../controllers/authController.js";
 
 const router = express.Router();
 
@@ -19,5 +20,6 @@ router.post("/login", login);
 router.get("/listar-usuarios", verificarToken, listarUsuarios);
 router.put("/:id", verificarToken, upload.single("foto"), updateUser);
 router.delete("/:id", verificarToken, deleteUser);
+router.get("/me", verificarToken, getProfile);
 
 export default router;
