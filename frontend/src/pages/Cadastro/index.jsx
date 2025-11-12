@@ -1,15 +1,40 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { cadastrarUsuario } from "../../services/cadastroService";
 
 export default function Cadastro() {
-  const [nome, setNome] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const nameRef = useRef();
+  const emailRef = useRef();
+  const passwordRef = useRef();
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const dados = { nome, email, password };
-    console.log("Cadastro enviado:", dados);
-    // 👉 Chame sua API aqui, ex: cadastrarUsuario(dados)
+    setLoading(true);
+
+    const dados = {
+      name: nameRef.current.value,
+      email: emailRef.current.value,
+      password: passwordRef.current.value,
+    };
+
+    try {
+      const usuarioCriado = await cadastrarUsuario(dados);
+      alert(
+        `✅ Cadastro realizado com sucesso! Bem-vindo, ${usuarioCriado.name}`
+      );
+      e.target.reset();
+    } catch (error) {
+      alert(
+        error.response?.data?.message ||
+          `❌ Erro ao cadastrar. Dados enviados: ${JSON.stringify(
+            dados,
+            null,
+            2
+          )}`
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -31,10 +56,9 @@ export default function Cadastro() {
             Nome completo
           </label>
           <input
+            ref={nameRef}
             type="text"
             id="nome"
-            value={nome}
-            onChange={(e) => setNome(e.target.value)}
             placeholder="Seu nome completo"
             required
             className="w-full p-3 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 
@@ -52,10 +76,9 @@ export default function Cadastro() {
             E-mail
           </label>
           <input
+            ref={emailRef}
             type="email"
             id="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
             placeholder="email@exemplo.com"
             required
             className="w-full p-3 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 
@@ -73,10 +96,9 @@ export default function Cadastro() {
             Senha
           </label>
           <input
+            ref={passwordRef}
             type="password"
             id="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
             placeholder="••••••••"
             required
             className="w-full p-3 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 
@@ -88,11 +110,15 @@ export default function Cadastro() {
         {/* Botão */}
         <button
           type="submit"
-          className="w-full py-3 text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 
-            font-semibold rounded-lg shadow-md transition-all duration-200 focus:outline-none focus:ring-2 
-            focus:ring-blue-400 focus:ring-offset-2 dark:focus:ring-blue-300"
+          disabled={loading}
+          className={`w-full py-3 text-white font-semibold rounded-lg shadow-md transition-all duration-200 focus:outline-none focus:ring-2 
+            focus:ring-blue-400 focus:ring-offset-2 dark:focus:ring-blue-300 ${
+              loading
+                ? "bg-blue-700 cursor-not-allowed"
+                : "bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600"
+            }`}
         >
-          Cadastrar
+          {loading ? "Cadastrando..." : "Cadastrar"}
         </button>
       </form>
     </div>
