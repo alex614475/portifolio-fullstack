@@ -1,25 +1,26 @@
-import Sequelize, { Model } from "sequelize";
+// src/database/models/userModel.js
+import { DataTypes, Model } from "sequelize";
 
-class User extends Model {
-  static init(sequelize) {
-    super.init(
+export default class User extends Model {
+  static initModel(sequelize) {
+    User.init(
       {
         id: {
-          type: Sequelize.UUID,
-          defaultValue: Sequelize.UUIDV4,
+          type: DataTypes.UUID,
+          defaultValue: DataTypes.UUIDV4,
           primaryKey: true,
         },
         name: {
-          type: Sequelize.STRING,
+          type: DataTypes.STRING,
           allowNull: false,
         },
         email: {
-          type: Sequelize.STRING,
+          type: DataTypes.STRING,
           allowNull: false,
           unique: true,
         },
         password: {
-          type: Sequelize.STRING,
+          type: DataTypes.STRING,
           allowNull: false,
         },
       },
@@ -33,5 +34,3 @@ class User extends Model {
     );
   }
 }
-
-export default User;

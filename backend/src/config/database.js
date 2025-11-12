@@ -1,4 +1,7 @@
-export default {
+// src/database/config/database.js
+import { Sequelize } from "sequelize";
+
+const config = {
   dialect: "postgres",
   database: "meuBanco",
   username: "postgres",
@@ -12,3 +15,13 @@ export default {
     underscoredAll: true,
   },
 };
+
+// Cria a instância Sequelize usando as configs acima
+export const sequelize = new Sequelize(
+  config.database,
+  config.username,
+  config.password,
+  config
+);
+
+export default config;
