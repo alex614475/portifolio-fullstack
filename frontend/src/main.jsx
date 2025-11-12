@@ -6,6 +6,7 @@ import App from "./App";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Cadastro from "./pages/Cadastro";
+import ListarUsuarios from "./pages/Listar";
 import "./index.css";
 
 const router = createBrowserRouter([
@@ -16,6 +17,7 @@ const router = createBrowserRouter([
       { path: "/", element: <Home /> },
       { path: "/login", element: <Login /> },
       { path: "/cadastro", element: <Cadastro /> },
+      { path: "/listar-usuarios", element: <ListarUsuarios /> },
     ],
   },
 ]);

@@ -1,14 +1,37 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { loginUsuario } from "../../services/loginService";
+import { Link, useNavigate } from "react-router-dom";
 
 export default function Login() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const emailRef = useRef();
+  const passwordRef = useRef();
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const dados = { email, password };
-    console.log("Login enviado:", dados);
-    // 👉 Chame sua API de login aqui
+    setLoading(true);
+
+    const dados = {
+      email: emailRef.current.value,
+      password: passwordRef.current.value,
+    };
+
+    try {
+      const data = await loginUsuario(dados); // data = { token }
+      const { token } = data;
+
+      localStorage.setItem("token", token);
+
+      +navigate("/listar-usuarios");
+    } catch (error) {
+      alert(
+        error.response?.data?.message ||
+          `Erro ao logar. Dados enviados: ${JSON.stringify(dados, null, 2)}`
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -30,10 +53,9 @@ export default function Login() {
             E-mail
           </label>
           <input
+            ref={emailRef}
             type="email"
             id="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
             placeholder="email@exemplo.com"
             required
             className="w-full p-3 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 
@@ -51,10 +73,9 @@ export default function Login() {
             Senha
           </label>
           <input
+            ref={passwordRef}
             type="password"
             id="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
             placeholder="••••••••"
             required
             className="w-full p-3 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 
@@ -66,22 +87,26 @@ export default function Login() {
         {/* Botão */}
         <button
           type="submit"
-          className="w-full py-3 text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 
-            font-semibold rounded-lg shadow-md transition-all duration-200 focus:outline-none focus:ring-2 
-            focus:ring-blue-400 focus:ring-offset-2 dark:focus:ring-blue-300"
+          disabled={loading}
+          className={`w-full py-3 text-white font-semibold rounded-lg shadow-md transition-all duration-200 focus:outline-none focus:ring-2 
+            focus:ring-blue-400 focus:ring-offset-2 dark:focus:ring-blue-300 ${
+              loading
+                ? "bg-blue-700 cursor-not-allowed"
+                : "bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600"
+            }`}
         >
-          Entrar
+          {loading ? "Entrando..." : "Entrar"}
         </button>
 
         {/* Link para cadastro */}
         <p className="mt-6 text-sm text-gray-600 dark:text-gray-400 text-center">
           Não tem conta?{" "}
-          <a
-            href="/cadastro"
+          <Link
+            to="/cadastro"
             className="text-blue-600 hover:underline dark:text-blue-400"
           >
             Cadastre-se
-          </a>
+          </Link>
         </p>
       </form>
     </div>

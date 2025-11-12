@@ -1,98 +1,82 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import api from "../../services/api"; // ajuste o caminho se necessário
 
-export default function Login() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [remember, setRemember] = useState(false);
+export default function ListarUsuarios() {
+  const [usuarios, setUsuarios] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  useEffect(() => {
+    const carregarUsuarios = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const response = await api.get("/users", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setUsuarios(response.data);
+      } catch (error) {
+        console.error("Erro ao carregar usuários:", error);
+        alert(
+          error.response?.data?.message || "Erro ao carregar lista de usuários."
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    const dados = { email, password, remember };
-    console.log("Login enviado:", dados);
-    // 👉 Aqui você vai chamar sua API, ex: loginUsuario(dados)
-  };
+    carregarUsuarios();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <p className="text-gray-600 dark:text-gray-300 text-lg">
+          Carregando usuários...
+        </p>
+      </div>
+    );
+  }
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100 dark:bg-gray-900">
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white dark:bg-gray-800 shadow-lg rounded-xl p-8 w-full max-w-sm transition-colors duration-300"
-      >
-        <h2 className="text-2xl font-semibold text-gray-800 dark:text-white mb-6 text-center">
-          Acessar conta
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-8">
+      <div className="max-w-5xl mx-auto bg-white dark:bg-gray-800 shadow-md rounded-xl p-6">
+        <h2 className="text-2xl font-semibold text-gray-800 dark:text-white mb-6">
+          Lista de Usuários
         </h2>
 
-        {/* Email */}
-        <div className="mb-5">
-          <label
-            htmlFor="email"
-            className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-          >
-            E-mail
-          </label>
-          <input
-            type="email"
-            id="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg 
-              focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 
-              dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
-            placeholder="email@exemplo.com"
-            required
-          />
-        </div>
-
-        {/* Senha */}
-        <div className="mb-5">
-          <label
-            htmlFor="password"
-            className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-          >
-            Senha
-          </label>
-          <input
-            type="password"
-            id="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg 
-              focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 
-              dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
-            placeholder="••••••••"
-            required
-          />
-        </div>
-
-        {/* Lembrar */}
-        <div className="flex items-center mb-5">
-          <input
-            id="remember"
-            type="checkbox"
-            checked={remember}
-            onChange={(e) => setRemember(e.target.checked)}
-            className="w-4 h-4 border border-gray-300 rounded-sm bg-gray-50 
-              focus:ring-3 focus:ring-blue-300 dark:bg-gray-700 dark:border-gray-600 
-              dark:focus:ring-blue-600"
-          />
-          <label
-            htmlFor="remember"
-            className="ml-2 text-sm font-medium text-gray-900 dark:text-gray-300"
-          >
-            Lembrar-me
-          </label>
-        </div>
-
-        <button
-          type="submit"
-          className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 
-            focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm 
-            w-full px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700"
-        >
-          Entrar
-        </button>
-      </form>
+        {usuarios.length === 0 ? (
+          <p className="text-gray-500 dark:text-gray-400 text-center py-10">
+            Nenhum usuário encontrado.
+          </p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm text-left text-gray-700 dark:text-gray-300">
+              <thead className="bg-gray-200 dark:bg-gray-700 uppercase text-xs font-semibold">
+                <tr>
+                  <th className="px-6 py-3">ID</th>
+                  <th className="px-6 py-3">Nome</th>
+                  <th className="px-6 py-3">E-mail</th>
+                  <th className="px-6 py-3">Criado em</th>
+                </tr>
+              </thead>
+              <tbody>
+                {usuarios.map((user) => (
+                  <tr
+                    key={user.id}
+                    className="border-b dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700"
+                  >
+                    <td className="px-6 py-4">{user.id}</td>
+                    <td className="px-6 py-4">{user.name}</td>
+                    <td className="px-6 py-4">{user.email}</td>
+                    <td className="px-6 py-4">
+                      {new Date(user.createdAt).toLocaleDateString("pt-BR")}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
