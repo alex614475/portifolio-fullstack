@@ -81,3 +81,63 @@ export const listarUsuarios = async (req, res) => {
     });
   }
 };
+
+export const updateUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, email, password } = req.body;
+
+    const user = await User.findByPk(id);
+
+    if (!user) {
+      return res.status(404).json({ message: "Usuário não encontrado" });
+    }
+
+    // Se o password foi enviado, hash antes de atualizar
+    let hashedPassword = user.password;
+    if (password) {
+      hashedPassword = await bcrypt.hash(password, 10);
+    }
+
+    await user.update({
+      name: name || user.name,
+      email: email || user.email,
+      password: hashedPassword,
+    });
+
+    return res.status(200).json({
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      updatedAt: user.updatedAt,
+    });
+  } catch (error) {
+    console.error("Erro ao atualizar usuário:", error);
+    return res.status(500).json({
+      message: "Erro ao atualizar usuário",
+      error: error.message,
+    });
+  }
+};
+
+export const deleteUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const user = await User.findByPk(id);
+
+    if (!user) {
+      return res.status(404).json({ message: "Usuário não encontrado" });
+    }
+
+    await user.destroy();
+
+    return res.status(200).json({ message: "Usuário excluído com sucesso" });
+  } catch (error) {
+    console.error("Erro ao excluir usuário:", error);
+    return res.status(500).json({
+      message: "Erro ao excluir usuário",
+      error: error.message,
+    });
+  }
+};

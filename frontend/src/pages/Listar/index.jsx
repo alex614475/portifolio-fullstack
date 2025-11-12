@@ -45,21 +45,37 @@ export default function ListarUsuarios() {
 
     try {
       const token = localStorage.getItem("token");
-      await api.delete(`/auth/excluir-usuario/${id}`, {
+
+      await api.delete(`/auth/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+
       alert("Usuário excluído com sucesso!");
-      atualizarLista();
+      atualizarLista(); // recarrega a lista após exclusão
     } catch (err) {
       console.error("Erro ao excluir usuário:", err);
       alert("Não foi possível excluir o usuário.");
     }
   };
+  const editarUsuario = async (id) => {
+    const novoNome = prompt("Digite o novo nome do usuário:");
+    if (!novoNome) return;
 
-  const editarUsuario = (id) => {
-    // Aqui você pode redirecionar para uma página de edição, por exemplo:
-    // navigate(`/editar-usuario/${id}`);
-    alert(`Redirecionar para editar usuário de ID: ${id}`);
+    try {
+      const token = localStorage.getItem("token");
+
+      await api.put(
+        `/auth/${id}`,
+        { name: novoNome },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      alert("Usuário atualizado com sucesso!");
+      atualizarLista();
+    } catch (err) {
+      console.error("Erro ao editar usuário:", err);
+      alert("Não foi possível editar o usuário.");
+    }
   };
 
   return (
